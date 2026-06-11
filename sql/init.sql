@@ -4,7 +4,7 @@ create table if not exists knowledge_base (
   id uuid primary key default gen_random_uuid(),
   title text not null,
   content text not null,
-  embedding vector(1536) not null,
+  embedding vector(1024) not null,
   created_at timestamptz not null default now()
 );
 
@@ -36,7 +36,7 @@ create index if not exists feedback_chat_id_idx
 on feedback (chat_id);
 
 create or replace function match_knowledge_base(
-  query_embedding vector(1536),
+  query_embedding vector(1024),
   match_threshold float,
   match_count int
 )

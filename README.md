@@ -22,7 +22,7 @@
 - 数据库：Supabase PostgreSQL
 - 向量数据库：Supabase Vector / pgvector
 - 回答模型：Ollama、OpenRouter、Groq、SiliconFlow、DeepSeek
-- Embedding：OpenAI `text-embedding-3-small`
+- Embedding：SiliconFlow `BAAI/bge-m3`，本地可用 Ollama `mxbai-embed-large`
 - 部署：Vercel
 - 代码托管：GitHub
 
@@ -50,6 +50,38 @@ LLM_PROVIDER=deepseek
 | SiliconFlow | `SILICONFLOW_API_KEY`、`SILICONFLOW_MODEL` | 模型名从环境变量读取 |
 | DeepSeek | `DEEPSEEK_API_KEY`、`DEEPSEEK_BASE_URL`、`DEEPSEEK_MODEL` | 付费备用方案，默认 `deepseek-chat` |
 
+## Embedding Provider 配置
+
+知识库保存和 RAG 检索使用 embedding。为了避免 OpenAI 额度问题，默认使用 SiliconFlow 在线 embedding；本地也可以使用 Ollama embedding。
+
+```env
+EMBEDDING_PROVIDER=siliconflow
+SILICONFLOW_API_KEY=你的 SiliconFlow API Key
+SILICONFLOW_EMBEDDING_MODEL=BAAI/bge-m3
+EMBEDDING_DIMENSION=1024
+```
+
+本地免费 embedding：
+
+```bash
+ollama pull mxbai-embed-large
+```
+
+```env
+EMBEDDING_PROVIDER=ollama
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_EMBEDDING_MODEL=mxbai-embed-large
+EMBEDDING_DIMENSION=1024
+```
+
+注意：Supabase `knowledge_base.embedding` 必须和 embedding 模型维度一致。本项目默认使用 `vector(1024)`。如果你之前已经执行过旧版 `vector(1536)` SQL，需要在 Supabase SQL Editor 执行：
+
+```text
+sql/migrate_embedding_1024.sql
+```
+
+迁移会清空旧知识库内容，因为旧 embedding 维度无法直接复用。执行后重新在 `/admin` 添加知识库即可。
+
 Ollama 可选模型：
 
 ```bash
@@ -73,7 +105,7 @@ OLLAMA_MODEL=qwen2.5:7b
 ```text
 用户提问
 ↓
-OpenAI text-embedding-3-small 生成 query embedding
+SiliconFlow / Ollama 生成 query embedding
 ↓
 Supabase Vector 调用 match_knowledge_base 检索相似知识
 ↓
@@ -165,8 +197,10 @@ LLM_PROVIDER=ollama
 OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=qwen2.5:7b
 
-OPENAI_API_KEY=你的 OpenAI API Key
-OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+EMBEDDING_PROVIDER=siliconflow
+SILICONFLOW_API_KEY=你的 SiliconFlow API Key
+SILICONFLOW_EMBEDDING_MODEL=BAAI/bge-m3
+EMBEDDING_DIMENSION=1024
 
 ADMIN_PASSWORD=你自己的后台演示密码
 ```
@@ -187,8 +221,9 @@ npm run dev
 1. 打开 Supabase 控制台。
 2. 创建一个新项目。
 3. 进入 SQL Editor。
-4. 粘贴并执行 `sql/init.sql`。
-5. 在 Project Settings 中复制：
+4. 新项目粘贴并执行 `sql/init.sql`。
+5. 如果你之前执行过旧版 `vector(1536)`，改为执行 `sql/migrate_embedding_1024.sql`，然后重新添加知识库。
+6. 在 Project Settings 中复制：
    - Project URL → `NEXT_PUBLIC_SUPABASE_URL`
    - service_role key → `SUPABASE_SERVICE_ROLE_KEY`
 
@@ -206,8 +241,10 @@ npm run dev
 8. 在 Vercel 中配置环境变量：
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `SUPABASE_SERVICE_ROLE_KEY`
-   - `OPENAI_API_KEY`
-   - `OPENAI_EMBEDDING_MODEL`
+   - `EMBEDDING_PROVIDER`
+   - `EMBEDDING_DIMENSION`
+   - `SILICONFLOW_API_KEY`
+   - `SILICONFLOW_EMBEDDING_MODEL`
    - `LLM_PROVIDER`
    - 对应 Provider 的 API Key 和模型名，例如 `GROQ_API_KEY` + `GROQ_MODEL`
    - `ADMIN_PASSWORD`
@@ -221,7 +258,7 @@ npm run dev
 - 备用方案：DeepSeek API 按量付费用于回答生成。
 - Supabase 免费版存储业务数据和向量数据。
 - Vercel 免费版托管前端和 API Routes。
-- OpenAI embedding 按量付费用于知识库检索。
+- SiliconFlow embedding 或 Ollama embedding 用于知识库检索，避免强依赖 OpenAI。
 - 暂不购买服务器和域名，直接使用 Vercel 免费二级域名。
 
 ## 推荐演示流程
@@ -301,6 +338,7 @@ ai-customer-service-agent
 ├── tests
 │   ├── chunk.test.ts
 │   ├── dashboard.test.ts
+│   ├── embeddings.test.ts
 │   ├── llm.test.ts
 │   └── rag.test.ts
 ├── .env.example
