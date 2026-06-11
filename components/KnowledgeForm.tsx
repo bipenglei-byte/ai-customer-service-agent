@@ -31,7 +31,7 @@ export default function KnowledgeForm({ adminPassword, onSaved }: Props) {
       const payload = await response.json();
 
       if (!response.ok) {
-        throw new Error(payload.error || "保存失败");
+        throw new Error(payload.detail || payload.error || "保存失败");
       }
 
       setTitle("");

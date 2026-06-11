@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ items: data || [] });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("[knowledge:get]", message);
     return NextResponse.json(
       { error: "获取知识库失败。", detail: message },
       { status: 500 }
@@ -71,6 +72,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ items: data || [] }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("[knowledge:post]", message);
     return NextResponse.json(
       { error: "保存知识库失败。", detail: message },
       { status: 500 }
@@ -99,6 +101,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("[knowledge:delete]", message);
     return NextResponse.json(
       { error: "删除知识库失败。", detail: message },
       { status: 500 }
