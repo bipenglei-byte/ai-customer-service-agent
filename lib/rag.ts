@@ -8,7 +8,9 @@ import {
 import { getSupabaseAdmin, type KnowledgeMatch } from "@/lib/supabase";
 
 export const RAG_TOP_K = 5;
-export const RAG_SIMILARITY_THRESHOLD = 0.7;
+export const RAG_SIMILARITY_THRESHOLD = Number(
+  process.env.RAG_SIMILARITY_THRESHOLD || 0.5
+);
 
 export type RagAnswer = {
   answer: string;

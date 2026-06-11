@@ -110,7 +110,7 @@ SiliconFlow / Ollama 生成 query embedding
 ↓
 Supabase Vector 调用 match_knowledge_base 检索相似知识
 ↓
-取 TopK = 5 且相似度 >= 0.7 的内容
+取 TopK = 5 且相似度 >= 0.5 的内容
 ↓
 拼接企业知识库上下文与客服 Agent Prompt
 ↓
@@ -122,7 +122,7 @@ Supabase Vector 调用 match_knowledge_base 检索相似知识
 固定参数：
 
 - TopK：5
-- 相似度阈值：0.7
+- 相似度阈值：0.5，可通过 `RAG_SIMILARITY_THRESHOLD` 调整
 - Chunk Size：500
 - Chunk Overlap：100
 

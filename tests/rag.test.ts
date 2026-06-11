@@ -3,7 +3,13 @@ import {
   FALLBACK_TRANSFER_MESSAGE,
   buildCustomerPrompt
 } from "@/lib/prompts";
-import { runRagWithDependencies } from "@/lib/rag";
+import { RAG_SIMILARITY_THRESHOLD, runRagWithDependencies } from "@/lib/rag";
+
+describe("RAG参数", () => {
+  it("默认相似度阈值适合中文短问题演示", () => {
+    expect(RAG_SIMILARITY_THRESHOLD).toBe(0.5);
+  });
+});
 
 describe("RAG客服流程", () => {
   it("知识库相似度低于阈值时转人工且不调用大模型", async () => {
