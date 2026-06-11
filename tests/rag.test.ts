@@ -32,6 +32,7 @@ describe("RAG客服流程", () => {
     expect(result.answer).toBe(FALLBACK_TRANSFER_MESSAGE);
     expect(result.isResolved).toBe(false);
     expect(result.matchedKnowledge).toEqual([]);
+    expect(result.retrievedKnowledge).toHaveLength(1);
     expect(complete).not.toHaveBeenCalled();
   });
 

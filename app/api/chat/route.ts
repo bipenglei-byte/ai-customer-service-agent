@@ -34,7 +34,8 @@ export async function POST(request: NextRequest) {
       chatId: data.id,
       answer: ragResult.answer,
       isResolved: ragResult.isResolved,
-      matchedKnowledge: ragResult.matchedKnowledge
+      matchedKnowledge: ragResult.matchedKnowledge,
+      retrievedKnowledge: ragResult.retrievedKnowledge
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

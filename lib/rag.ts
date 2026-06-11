@@ -16,6 +16,7 @@ export type RagAnswer = {
   answer: string;
   isResolved: boolean;
   matchedKnowledge: KnowledgeContext[];
+  retrievedKnowledge: KnowledgeContext[];
 };
 
 type RagDependencies = {
@@ -30,15 +31,32 @@ export async function runRagWithDependencies(
 ): Promise<RagAnswer> {
   const embedding = await dependencies.embed(question);
   const matches = await dependencies.search(embedding);
+  const retrievedKnowledge = matches.map((item) => ({
+    title: item.title,
+    content: item.content,
+    similarity: item.similarity
+  }));
   const relevantMatches = matches.filter(
     (item) => item.similarity >= RAG_SIMILARITY_THRESHOLD
   );
 
   if (relevantMatches.length === 0) {
+    console.info(
+      "[rag:no-match]",
+      JSON.stringify({
+        threshold: RAG_SIMILARITY_THRESHOLD,
+        retrieved: retrievedKnowledge.map((item) => ({
+          title: item.title,
+          similarity: item.similarity
+        }))
+      })
+    );
+
     return {
       answer: FALLBACK_TRANSFER_MESSAGE,
       isResolved: false,
-      matchedKnowledge: []
+      matchedKnowledge: [],
+      retrievedKnowledge
     };
   }
 
@@ -54,7 +72,8 @@ export async function runRagWithDependencies(
   return {
     answer,
     isResolved: answer.trim() !== FALLBACK_TRANSFER_MESSAGE,
-    matchedKnowledge: contexts
+    matchedKnowledge: contexts,
+    retrievedKnowledge
   };
 }
 
@@ -66,7 +85,7 @@ export async function answerWithRag(question: string): Promise<RagAnswer> {
     search: async (embedding) => {
       const { data, error } = await supabase.rpc("match_knowledge_base", {
         query_embedding: embedding,
-        match_threshold: RAG_SIMILARITY_THRESHOLD,
+        match_threshold: 0,
         match_count: RAG_TOP_K
       });
 
