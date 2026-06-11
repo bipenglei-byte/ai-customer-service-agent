@@ -13,6 +13,7 @@ function resetEnv() {
   delete process.env.GROQ_API_KEY;
   delete process.env.GROQ_MODEL;
   delete process.env.SILICONFLOW_API_KEY;
+  delete process.env.SILICONFLOW_BASE_URL;
   delete process.env.SILICONFLOW_MODEL;
   delete process.env.DEEPSEEK_API_KEY;
   delete process.env.DEEPSEEK_BASE_URL;
@@ -70,7 +71,7 @@ describe("LLM provider resolver", () => {
     expect(resolveLlmConfig()).toMatchObject({
       provider: "siliconflow",
       apiKey: "silicon-key",
-      endpoint: "https://api.siliconflow.com/v1/chat/completions",
+      endpoint: "https://api.siliconflow.cn/v1/chat/completions",
       model: "Qwen/Qwen2.5-7B-Instruct"
     });
   });

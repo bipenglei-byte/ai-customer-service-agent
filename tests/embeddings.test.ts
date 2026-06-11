@@ -8,6 +8,7 @@ function resetEnv() {
   delete process.env.EMBEDDING_PROVIDER;
   delete process.env.EMBEDDING_DIMENSION;
   delete process.env.SILICONFLOW_API_KEY;
+  delete process.env.SILICONFLOW_BASE_URL;
   delete process.env.SILICONFLOW_EMBEDDING_MODEL;
   delete process.env.OLLAMA_BASE_URL;
   delete process.env.OLLAMA_EMBEDDING_MODEL;
@@ -28,9 +29,20 @@ describe("embedding provider resolver", () => {
     expect(resolveEmbeddingConfig()).toMatchObject({
       provider: "siliconflow",
       apiKey: "silicon-key",
-      endpoint: "https://api.siliconflow.com/v1/embeddings",
+      endpoint: "https://api.siliconflow.cn/v1/embeddings",
       model: "BAAI/bge-m3",
       dimension: 1024
+    });
+  });
+
+  it("allows overriding SiliconFlow base URL", () => {
+    resetEnv();
+    process.env.SILICONFLOW_API_KEY = "silicon-key";
+    process.env.SILICONFLOW_BASE_URL = "https://api.siliconflow.com/v1";
+
+    expect(resolveEmbeddingConfig()).toMatchObject({
+      provider: "siliconflow",
+      endpoint: "https://api.siliconflow.com/v1/embeddings"
     });
   });
 
@@ -98,7 +110,7 @@ describe("createEmbedding", () => {
 
     await expect(createEmbedding("退款政策")).resolves.toEqual([0.1, 0.2, 0.3]);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://api.siliconflow.com/v1/embeddings",
+      "https://api.siliconflow.cn/v1/embeddings",
       expect.any(Object)
     );
   });

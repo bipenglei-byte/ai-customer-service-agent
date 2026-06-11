@@ -29,6 +29,7 @@ type OllamaEmbeddingResponse = {
 };
 
 const DEFAULT_SILICONFLOW_MODEL = "BAAI/bge-m3";
+const DEFAULT_SILICONFLOW_BASE_URL = "https://api.siliconflow.cn/v1";
 const DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434";
 const DEFAULT_OLLAMA_EMBEDDING_MODEL = "mxbai-embed-large";
 
@@ -114,7 +115,9 @@ export function resolveEmbeddingConfig(): EmbeddingConfig {
   return {
     provider,
     apiKey,
-    endpoint: "https://api.siliconflow.com/v1/embeddings",
+    endpoint: `${cleanBaseUrl(
+      process.env.SILICONFLOW_BASE_URL || DEFAULT_SILICONFLOW_BASE_URL
+    )}/embeddings`,
     model: process.env.SILICONFLOW_EMBEDDING_MODEL || DEFAULT_SILICONFLOW_MODEL,
     dimension: embeddingDimension(1024)
   };

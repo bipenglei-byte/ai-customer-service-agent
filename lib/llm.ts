@@ -44,6 +44,7 @@ type OllamaResponse = {
 
 const DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434";
 const DEFAULT_OLLAMA_MODEL = "qwen2.5:7b";
+const DEFAULT_SILICONFLOW_BASE_URL = "https://api.siliconflow.cn/v1";
 
 const providerApiKeyEnv: Record<Exclude<LlmProvider, "ollama">, string> = {
   openrouter: "OPENROUTER_API_KEY",
@@ -134,10 +135,14 @@ export function resolveLlmConfig(): LlmConfig {
   }
 
   if (provider === "siliconflow") {
+    const baseUrl = cleanBaseUrl(
+      process.env.SILICONFLOW_BASE_URL || DEFAULT_SILICONFLOW_BASE_URL
+    );
+
     return {
       provider,
       apiKey,
-      endpoint: "https://api.siliconflow.com/v1/chat/completions",
+      endpoint: `${baseUrl}/chat/completions`,
       model: process.env.SILICONFLOW_MODEL || ""
     };
   }

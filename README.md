@@ -47,7 +47,7 @@ LLM_PROVIDER=deepseek
 | Ollama | `OLLAMA_BASE_URL`、`OLLAMA_MODEL` | 默认 `http://localhost:11434` + `qwen2.5:7b` |
 | OpenRouter | `OPENROUTER_API_KEY`、`OPENROUTER_MODEL` | 模型名从环境变量读取 |
 | Groq | `GROQ_API_KEY`、`GROQ_MODEL` | 模型名从环境变量读取 |
-| SiliconFlow | `SILICONFLOW_API_KEY`、`SILICONFLOW_MODEL` | 模型名从环境变量读取 |
+| SiliconFlow | `SILICONFLOW_API_KEY`、`SILICONFLOW_BASE_URL`、`SILICONFLOW_MODEL` | 中国站默认 `https://api.siliconflow.cn/v1` |
 | DeepSeek | `DEEPSEEK_API_KEY`、`DEEPSEEK_BASE_URL`、`DEEPSEEK_MODEL` | 付费备用方案，默认 `deepseek-chat` |
 
 ## Embedding Provider 配置
@@ -57,6 +57,7 @@ LLM_PROVIDER=deepseek
 ```env
 EMBEDDING_PROVIDER=siliconflow
 SILICONFLOW_API_KEY=你的 SiliconFlow API Key
+SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1
 SILICONFLOW_EMBEDDING_MODEL=BAAI/bge-m3
 EMBEDDING_DIMENSION=1024
 ```
@@ -243,8 +244,9 @@ npm run dev
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `EMBEDDING_PROVIDER`
    - `EMBEDDING_DIMENSION`
-   - `SILICONFLOW_API_KEY`
-   - `SILICONFLOW_EMBEDDING_MODEL`
+- `SILICONFLOW_API_KEY`
+- `SILICONFLOW_BASE_URL`
+- `SILICONFLOW_EMBEDDING_MODEL`
    - `LLM_PROVIDER`
    - 对应 Provider 的 API Key 和模型名，例如 `GROQ_API_KEY` + `GROQ_MODEL`
    - `ADMIN_PASSWORD`
