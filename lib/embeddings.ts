@@ -36,6 +36,15 @@ function cleanBaseUrl(baseUrl: string) {
   return baseUrl.replace(/\/$/, "");
 }
 
+function cleanApiKey(apiKey: string) {
+  return apiKey
+    .trim()
+    .replace(/^["']|["']$/g, "")
+    .trim()
+    .replace(/^Bearer\s+/i, "")
+    .trim();
+}
+
 function embeddingDimension(defaultDimension: number) {
   const configured = Number(process.env.EMBEDDING_DIMENSION);
   return Number.isFinite(configured) && configured > 0
@@ -79,7 +88,9 @@ export function resolveEmbeddingConfig(): EmbeddingConfig {
   }
 
   if (provider === "openai") {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY
+      ? cleanApiKey(process.env.OPENAI_API_KEY)
+      : "";
     if (!apiKey) {
       return ollamaEmbeddingConfig();
     }
@@ -93,7 +104,9 @@ export function resolveEmbeddingConfig(): EmbeddingConfig {
     };
   }
 
-  const apiKey = process.env.SILICONFLOW_API_KEY;
+  const apiKey = process.env.SILICONFLOW_API_KEY
+    ? cleanApiKey(process.env.SILICONFLOW_API_KEY)
+    : "";
   if (!apiKey) {
     return ollamaEmbeddingConfig();
   }

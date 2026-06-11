@@ -34,6 +34,16 @@ describe("embedding provider resolver", () => {
     });
   });
 
+  it("normalizes pasted API keys with Bearer prefix, quotes, or whitespace", () => {
+    resetEnv();
+    process.env.SILICONFLOW_API_KEY = ' "Bearer silicon-key" ';
+
+    expect(resolveEmbeddingConfig()).toMatchObject({
+      provider: "siliconflow",
+      apiKey: "silicon-key"
+    });
+  });
+
   it("falls back to Ollama when SiliconFlow key is missing", () => {
     resetEnv();
 
