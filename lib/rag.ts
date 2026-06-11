@@ -12,6 +12,21 @@ export const RAG_SIMILARITY_THRESHOLD = Number(
   process.env.RAG_SIMILARITY_THRESHOLD || 0.5
 );
 
+const CUSTOMER_SERVICE_KEYWORDS = [
+  "退款",
+  "退货",
+  "发货",
+  "物流",
+  "售后",
+  "价格",
+  "费用",
+  "套餐",
+  "订单",
+  "产品",
+  "人工",
+  "客服"
+];
+
 export type RagAnswer = {
   answer: string;
   isResolved: boolean;
@@ -24,6 +39,27 @@ type RagDependencies = {
   search: (embedding: number[]) => Promise<KnowledgeMatch[]>;
   complete: (prompt: string) => Promise<string>;
 };
+
+export function extractKnowledgeKeywords(question: string) {
+  return CUSTOMER_SERVICE_KEYWORDS.filter((keyword) =>
+    question.includes(keyword)
+  );
+}
+
+async function answerFromContexts(
+  question: string,
+  contexts: KnowledgeContext[]
+): Promise<RagAnswer> {
+  const prompt = buildCustomerPrompt(question, contexts);
+  const answer = await generateCustomerAnswer(prompt);
+
+  return {
+    answer,
+    isResolved: answer.trim() !== FALLBACK_TRANSFER_MESSAGE,
+    matchedKnowledge: contexts,
+    retrievedKnowledge: contexts
+  };
+}
 
 export async function runRagWithDependencies(
   question: string,
@@ -79,6 +115,17 @@ export async function runRagWithDependencies(
 
 export async function answerWithRag(question: string): Promise<RagAnswer> {
   const supabase = getSupabaseAdmin();
+  const keywordMatches = await searchKnowledgeByKeywords(supabase, question);
+
+  if (keywordMatches.length > 0) {
+    const contexts = keywordMatches.map((item) => ({
+      title: item.title,
+      content: item.content,
+      similarity: item.similarity
+    }));
+
+    return answerFromContexts(question, contexts);
+  }
 
   return runRagWithDependencies(question, {
     embed: createEmbedding,
@@ -97,4 +144,38 @@ export async function answerWithRag(question: string): Promise<RagAnswer> {
     },
     complete: generateCustomerAnswer
   });
+}
+
+async function searchKnowledgeByKeywords(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  question: string
+) {
+  const keywords = extractKnowledgeKeywords(question);
+
+  if (keywords.length === 0) {
+    return [];
+  }
+
+  const orFilter = keywords
+    .flatMap((keyword) => [
+      `title.ilike.%${keyword}%`,
+      `content.ilike.%${keyword}%`
+    ])
+    .join(",");
+
+  const { data, error } = await supabase
+    .from("knowledge_base")
+    .select("id,title,content,created_at")
+    .or(orFilter)
+    .order("created_at", { ascending: false })
+    .limit(RAG_TOP_K);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data || []).map((item) => ({
+    ...item,
+    similarity: 1
+  })) as KnowledgeMatch[];
 }

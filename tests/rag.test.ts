@@ -3,11 +3,25 @@ import {
   FALLBACK_TRANSFER_MESSAGE,
   buildCustomerPrompt
 } from "@/lib/prompts";
-import { RAG_SIMILARITY_THRESHOLD, runRagWithDependencies } from "@/lib/rag";
+import {
+  RAG_SIMILARITY_THRESHOLD,
+  extractKnowledgeKeywords,
+  runRagWithDependencies
+} from "@/lib/rag";
 
 describe("RAG参数", () => {
   it("默认相似度阈值适合中文短问题演示", () => {
     expect(RAG_SIMILARITY_THRESHOLD).toBe(0.5);
+  });
+});
+
+describe("知识库关键词", () => {
+  it("从客服问题中提取高频业务关键词", () => {
+    expect(extractKnowledgeKeywords("退款政策是什么？")).toEqual(["退款"]);
+    expect(extractKnowledgeKeywords("发货多久，有售后吗？")).toEqual([
+      "发货",
+      "售后"
+    ]);
   });
 });
 
